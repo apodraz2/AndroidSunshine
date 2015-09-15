@@ -59,6 +59,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
 
+    public static final String ACTION_DATA_UPDATED = "com.example.android.sunshine.app.ACTION_DATA_UPDATED";
+
 
     private static final String[] NOTIFY_WEATHER_PROJECTION = new String[] {
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
@@ -338,6 +340,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                         WeatherContract.WeatherEntry.COLUMN_DATE + " <= ?",
                         new String[] {Long.toString(dayTime.setJulianDay(julianStartDay-1))});
 
+                updateWidgets();
                 notifyWeather();
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
@@ -348,6 +351,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_INVALID);
         }
+    }
+
+    private void updateWidgets() {
+        Context context = getContext();
+        // Setting the package ensures that only components in our app will receive the broadcast
+        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED)
+                .setPackage(context.getPackageName());
+        context.sendBroadcast(dataUpdatedIntent);
     }
 
     private void notifyWeather() {
